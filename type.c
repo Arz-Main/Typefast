@@ -26,6 +26,17 @@ void add_quote(char *text){
     QUOTE_ARRAY[QUOTE_COUNTER++] = strdup(text);
 }
 
+void deallocate_quote_array(){
+    if(!QUOTE_ARRAY){
+        return;
+    }
+    for(int i=0; i< QUOTE_COUNTER; i++){
+        free(QUOTE_ARRAY[i]);
+    }
+    free(QUOTE_ARRAY);
+    QUOTE_ARRAY = NULL;
+}
+
 void load_quotes(){
     add_quote("Software is like sex: it's better when it's free. - Linus Torvalds");
     add_quote("If we want users to like our software, we should design it to behave like a likable person. - Alan Cooper");
@@ -165,6 +176,7 @@ int main() {
             }
         } 
     }
+    deallocate_quote_array();
     endwin();
     return 0;
 }
