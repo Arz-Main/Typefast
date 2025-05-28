@@ -178,13 +178,13 @@ void deallocate_joke_array() {
 
 void show_menu() {
   attron(COLOR_PAIR(4));
-  printw(" ______        _     _______                    \n");
-  printw("|  ____|      | |   |__   __|                   \n");
-  printw("| |__ __ _ ___| |_     | |_   _ _ __   ___ _ __ \n");
+  printw(" ______        _     _______                      \n");
+  printw("|  ____|      | |   |__   __|                     \n");
+  printw("| |__ __ _ ___| |_     | |_   _ _ __   ___ _ __   \n");
   printw("|  __/ _` / __| __|    | | | | | '_ \\ / _ \\ '__|\n");
   printw("| | | (_| \\__ \\ |_     | | |_| | |_) |  __/ |   \n");
-  printw("|_|  \\__,_|___/\\__|    |_|\\__, | .__/ \\___|_|   \n");
-  printw("                           __/ | |              \n");
+  printw("|_|  \\__,_|___/\\__|    |_|\\__, | .__/ \\___|_| \n");
+  printw("                           __/ | |                \n");
   printw("                          |___/|_|              \n\n");
   attroff(COLOR_PAIR(4));
   attron(COLOR_PAIR(4) | A_BLINK);
