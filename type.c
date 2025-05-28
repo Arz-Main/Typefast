@@ -15,7 +15,7 @@ void draw_wrapped_text(const char *text, int start_row, int console_width) {
     i++;
   }
 }
-
+// helo
 int main() {
   // load quotes
   init_quote_array();
@@ -146,7 +146,8 @@ int main() {
     // top 5 hardest keys to type
     printw("4) Top 5 hardest keys to type: (RESULTS FOR ALL SESSIONS)\n");
 
-    // copy mistakes array, because mistakes will be acumulated from all sessions
+    // copy mistakes array, because mistakes will be acumulated from all
+    // sessions
     int copy_tipical_mistakes[MAX_KEYTYPES];
     memcpy(copy_tipical_mistakes, tipical_mistakes, MAX_KEYTYPES * sizeof(int));
 
