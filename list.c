@@ -1,7 +1,12 @@
 #include "list.h"
+#include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+char **QUOTE_ARRAY = NULL;
+int QUOTE_COUNTER = 0; // face ceva ODR violation da poh
+int console_width, console_height;
 void init_quote_array() {
   if (QUOTE_ARRAY)
     return;
@@ -69,4 +74,21 @@ void load_quotes() {
   add_quote("If, at first, you do not succeed, call it version 1.0. - Khayri "
             "R.R. Woulfe");
   add_quote("Computers are fast; developers keep them slow. - Anonymous");
+}
+void ShowMenu() {
+  attron(COLOR_PAIR(4));
+  printw(" ______        _     _______                    \n");
+  printw("|  ____|      | |   |__   __|                   \n");
+  printw("| |__ __ _ ___| |_     | |_   _ _ __   ___ _ __ \n");
+  printw("|  __/ _` / __| __|    | | | | | '_ \\ / _ \\ '__|\n");
+  printw("| | | (_| \\__ \\ |_     | | |_| | |_) |  __/ |   \n");
+  printw("|_|  \\__,_|___/\\__|    |_|\\__, | .__/ \\___|_|   \n");
+  printw("                           __/ | |              \n");
+  printw("                          |___/|_|              \n\n");
+  attroff(COLOR_PAIR(4));
+  attron(COLOR_PAIR(4) | A_BLINK);
+  printw(" +===========================================+\n");
+  printw(" |    Made by Linic Dan & Pisarenco Denis    |\n");
+  printw(" +===========================================+\n\n");
+  attrset(A_NORMAL);
 }

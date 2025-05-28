@@ -1,5 +1,5 @@
-#ifndef LIST_C
-#define LIST_C
+#ifndef LIST_H
+#define LIST_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,9 +10,10 @@
 
 extern int console_width, console_height;
 
-char **QUOTE_ARRAY = NULL;
-int QUOTE_COUNTER = 0; // face ceva ODR violation da poh
+extern char **QUOTE_ARRAY;
+extern int QUOTE_COUNTER;
 
+void ShowMenu();
 void init_quote_array();
 void add_quote(char *text);
 void deallocate_quote_array();
