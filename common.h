@@ -6,11 +6,11 @@
 #define MAX_QUOTE_LINE_SIZE 1000
 #define MAX_KEYTYPES 256
 
+#include <ncurses.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ncurses.h>
-#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <time.h>
@@ -18,6 +18,7 @@
 
 extern FILE *jokes;
 extern int console_width, console_height;
+extern int jokeCount;
 
 extern char **QUOTE_ARRAY;
 extern char **JOKE_ARRAY;

@@ -30,6 +30,7 @@ void deallocate_quote_array() {
   }
   free(QUOTE_ARRAY);
   QUOTE_ARRAY = NULL;
+  QUOTE_COUNTER = 0;
 }
 
 void load_quotes() {
@@ -79,78 +80,100 @@ void load_quotes() {
 void init_joke_array() {
   jokes = fopen("jokes.txt", "r");
   if (jokes == NULL) {
-    printf("jokes.txt not found!\n");
-    fclose(jokes);
-    exit(1);
+    printf("jokes.txt not found! Skipping jokes...\n");
+    jokeCount = 0;
+    JOKE_ARRAY = NULL;
+    return;
   }
+
   if (!(fscanf(jokes, "%d", &jokeCount) == 1)) {
-    printf("Joke count not found!\n");
+    printf("Joke count not found! Skipping jokes...\n");
     fclose(jokes);
-    exit(1);
+    jokeCount = 0;
+    JOKE_ARRAY = NULL;
+    return;
   }
+
+  if (jokeCount <= 0) {
+    printf("No jokes to load.\n");
+    fclose(jokes);
+    jokeCount = 0;
+    JOKE_ARRAY = NULL;
+    return;
+  }
+
   JOKE_ARRAY = malloc(jokeCount * 2 * sizeof(char *)); // for joke and punchline
   if (JOKE_ARRAY == NULL) {
-    printf("Error at jokes list memory allocation");
+    printf("Error at jokes list memory allocation\n");
     fclose(jokes);
-    exit(1);
+    jokeCount = 0;
+    return;
   }
+
+  for (int i = 0; i < jokeCount * 2; i++) {
+    JOKE_ARRAY[i] = NULL;
+  }
+
   char line[1000];
   int index = 0;
 
-  for (int i = 0; i < jokeCount; i++) {
-    char *jokeText = malloc(1000);
-    char *punchlineText = malloc(1000);
-    if ((jokeText == NULL) || (punchlineText == NULL)) {
-      printf("Error at allocation of text containers, fuck..\n");
-      fclose(jokes);
-      exit(1);
-    }
-    jokeText[0] = '\0';
-    punchlineText[0] = '\0';
-    fgets(line, sizeof(line), jokes);
+  fgets(line, sizeof(line), jokes);
 
-    for (int i = 0; i < jokeCount; i++) {
-      if (fgets(line, sizeof(line), jokes) != NULL) {
-        line[strcspn(line, "\n")] = '\0';
+  for (int i = 0; i < jokeCount && index < jokeCount * 2; i++) {
+    if (fgets(line, sizeof(line), jokes) != NULL) {
+      line[strcspn(line, "\n")] = '\0';
 
-        char *setup = malloc(500);
-        char *punchline = malloc(500);
+      char *setup = malloc(500);
+      char *punchline = malloc(500);
 
-        if (setup == NULL || punchline == NULL) {
-          printf("Error: Failed to allocate memory for joke %d\n", i);
-          fclose(jokes);
-          exit(1);
-        }
-        //= is joke and + is punchline
-        char *equal_pos = strchr(line, '=');
-        char *plus_pos = strchr(line, '+');
-
-        if (equal_pos != NULL && plus_pos != NULL) {
-          *plus_pos = '\0';
-          strcpy(setup, equal_pos + 1);
-          strcpy(punchline, plus_pos + 1);
-        } else if (equal_pos != NULL) {
-          strcpy(setup, equal_pos + 1);
-          strcpy(punchline, "");
-        } else {
-          strcpy(setup, line);
-          strcpy(punchline, "");
-        }
-
-        JOKE_ARRAY[index] = setup;
-        JOKE_ARRAY[index + 1] = punchline;
-        index += 2;
+      if (setup == NULL || punchline == NULL) {
+        printf("Error: Failed to allocate memory for joke %d\n", i);
+        free(setup);
+        free(punchline);
+        break;
       }
-    }
 
-    fclose(jokes);
+      setup[0] = '\0';
+      punchline[0] = '\0';
+
+      char *equal_pos = strchr(line, '=');
+      char *plus_pos = strchr(line, '+');
+
+      if (equal_pos != NULL && plus_pos != NULL) {
+        *plus_pos = '\0';
+        strcpy(setup, equal_pos + 1);
+        strcpy(punchline, plus_pos + 1);
+      } else if (equal_pos != NULL) {
+        strcpy(setup, equal_pos + 1);
+        strcpy(punchline, "");
+      } else {
+        strcpy(setup, line);
+        strcpy(punchline, "");
+      }
+
+      JOKE_ARRAY[index] = setup;
+      JOKE_ARRAY[index + 1] = punchline;
+      index += 2;
+    }
   }
+
+  fclose(jokes);
 }
+
 void deallocate_joke_array() {
+  if (JOKE_ARRAY == NULL) {
+    return;
+  }
+
   for (int i = 0; i < jokeCount * 2; i++) {
-    free(JOKE_ARRAY[i]);
+    if (JOKE_ARRAY[i] != NULL) {
+      free(JOKE_ARRAY[i]);
+      JOKE_ARRAY[i] = NULL;
+    }
   }
   free(JOKE_ARRAY);
+  JOKE_ARRAY = NULL;
+  jokeCount = 0;
 }
 
 void show_menu() {
@@ -170,7 +193,8 @@ void show_menu() {
   printw(" +===========================================+\n\n");
   attrset(A_NORMAL);
 
-  printf("   ★ Select what you want to type: \n");
-  printw("1 → Quotes\n");
-  printw("2 → Jokes");
+  printw("     Select what you want to type: \n");
+  printw("1: Quotes\n");
+  printw("2: Jokes\n");
+  printw("ESC: Exit\n");
 }
