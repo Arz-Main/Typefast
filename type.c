@@ -206,7 +206,7 @@ int main() {
                 }
             }
             tipical_mistakes[max_pos] = 0;
-            printw("   Key: \"%c\", it was typed wrong: %d times.\n", max_pos + ' ', max);
+            printw("   Key: \"%c\", it was typed wrong: %d time(s).\n", max_pos + ' ', max);
         }
 
         // wait for user to end
