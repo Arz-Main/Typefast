@@ -1,12 +1,9 @@
-#include "list.h"
-#include <ncurses.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "common.h"
 
 char **QUOTE_ARRAY = NULL;
 int QUOTE_COUNTER = 0; // face ceva ODR violation da poh
 int console_width, console_height;
+
 void init_quote_array() {
   if (QUOTE_ARRAY)
     return;
@@ -75,7 +72,8 @@ void load_quotes() {
             "R.R. Woulfe");
   add_quote("Computers are fast; developers keep them slow. - Anonymous");
 }
-void ShowMenu() {
+
+void show_menu() {
   attron(COLOR_PAIR(4));
   printw(" ______        _     _______                    \n");
   printw("|  ____|      | |   |__   __|                   \n");

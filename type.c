@@ -1,12 +1,4 @@
-#include "list.h"
-#include <ncurses.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <time.h>
-#include <unistd.h>
+#include "common.h"
 
 void handle_resize(int sig) {
   getmaxyx(stdscr, console_height, console_width);
@@ -28,6 +20,10 @@ int main() {
   // load quotes
   init_quote_array();
   load_quotes();
+
+  // char array of tipical typing mistakes
+  // will store mistakes on all sessions
+  int tipical_mistakes[MAX_KEYTYPES] = {0};
 
   // get terminal size
   int isActive = 1;
@@ -52,9 +48,6 @@ int main() {
   struct timeval start, end;
   double elapsed;
 
-  // char array of typical typing mistakes
-  int tipical_mistakes[256] = {0};
-
   while (isActive) {
     signal(SIGWINCH, handle_resize);
     getmaxyx(stdscr, console_height, console_width);
@@ -62,7 +55,9 @@ int main() {
     int c, col_iter = 0, row_index = 0;
     int total_typed_characters = 0, valid_typed_characters = 0;
     clear();
-    ShowMenu();
+
+    show_menu();
+
     printw("When ready, start typing by pressing \"F\" on your keyboard.\n");
     refresh();
     while ((c = getch())) {
@@ -147,16 +142,21 @@ int main() {
     printw("3) Accuracy: %.2lf %%\n", accuracy);
 
     // top 5 hardest keys to type
-    printw("4) Top 5 hardest keys to type: \n");
+    printw("4) Top 5 hardest keys to type: (RESULTS FOR ALL SESSIONS)\n");
+
+    // copy mistakes array, because mistakes will be acumulated from all sessions
+    int copy_tipical_mistakes[MAX_KEYTYPES];
+    memcpy(copy_tipical_mistakes, tipical_mistakes, MAX_KEYTYPES * sizeof(int));
+
     for (int j = 0; j < 5; j++) {
       int max = 0, max_pos = 0, i;
-      for (i = 0; i < 256; i++) {
-        if (tipical_mistakes[i] && max < tipical_mistakes[i]) {
-          max = tipical_mistakes[i];
+      for (i = 0; i < MAX_KEYTYPES; i++) {
+        if (copy_tipical_mistakes[i] && max < copy_tipical_mistakes[i]) {
+          max = copy_tipical_mistakes[i];
           max_pos = i;
         }
       }
-      tipical_mistakes[max_pos] = 0;
+      copy_tipical_mistakes[max_pos] = 0;
       printw("   Key: \"%c\", it was typed wrong: %d time(s).\n", max_pos + ' ',
              max);
     }
