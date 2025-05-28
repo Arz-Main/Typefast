@@ -4,8 +4,7 @@ CFLAGS = -Wall -g
 LDFLAGS = -lncurses
 
 TARGET = type
-SRC = type.c
-
+SRC = type.c list.c
 all: $(TARGET)
 
 $(TARGET): $(SRC)
