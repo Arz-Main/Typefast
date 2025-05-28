@@ -52,7 +52,7 @@ int main() {
     signal(SIGWINCH, handle_resize);
     getmaxyx(stdscr, console_height, console_width);
 
-    int c, col_iter = 0, row_index = 0;
+    int choice, col_iter = 0, row_index = 0;
     int total_typed_characters = 0, valid_typed_characters = 0;
     clear();
 
@@ -60,8 +60,9 @@ int main() {
 
     printw("When ready, start typing by pressing \"F\" on your keyboard.\n");
     refresh();
-    while ((c = getch())) {
-      if (c == 'F') {
+
+    while ((choice = getch())) {
+      if (choice == '1') {
         break;
       }
     }
@@ -79,11 +80,12 @@ int main() {
     // start timer
     gettimeofday(&start, NULL);
 
-    while ((c = getch()) != ESCAPE_CODE) {
+    while ((choice = getch()) != ESCAPE_CODE) {
       total_typed_characters++;
 
       // if backspace, remove char
-      if (c == 127 || c == 8 || c == KEY_BACKSPACE) { // for different terminals
+      if (choice == 127 || choice == 8 ||
+          choice == KEY_BACKSPACE) { // for different terminals
         if (col_iter) {
           col_iter--;
         }
@@ -104,13 +106,13 @@ int main() {
       row_index = col_iter / console_width + 1;
 
       // see if char typed was correctly
-      if (chosen_quote[col_iter] == c) {
+      if (chosen_quote[col_iter] == choice) {
         valid_typed_characters++;
         attron(COLOR_PAIR(1));
-        mvprintw(row_index, col_iter % console_width, "%c", c);
+        mvprintw(row_index, col_iter % console_width, "%c", choice);
       } else {
         // a check for what keys are hard to type
-        tipical_mistakes[c - ' '] += 1;
+        tipical_mistakes[choice - ' '] += 1;
 
         attron(COLOR_PAIR(2));
         mvprintw(row_index, col_iter % console_width, "%c",
@@ -166,11 +168,11 @@ int main() {
     printw("\rPress \"F\" to try again.\n");
     printw("\rPress \"ESC\" to exit the program.\n");
 
-    while ((c = getch())) {
-      if (c == 'F') {
+    while ((choice = getch())) {
+      if (choice == 'F') {
         clear();
         break;
-      } else if (c == ESCAPE_CODE) {
+      } else if (choice == ESCAPE_CODE) {
         isActive = 0;
         break;
       }
