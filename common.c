@@ -189,7 +189,7 @@ void show_menu() {
   attroff(COLOR_PAIR(4));
   attron(COLOR_PAIR(4) | A_BLINK);
   printw(" +===========================================+\n");
-  printw(" |    Made by Lisnic Dan & Pisarenco Denis    |\n");
+  printw(" |    Made by Lisnic Dan & Pisarenco Denis   |\n");
   printw(" +===========================================+\n\n");
   attrset(A_NORMAL);
 
