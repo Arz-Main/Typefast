@@ -6,99 +6,60 @@ typedef struct {
   int valid_chars;
   double elapsed_time;
   int *mistakes;
-} TypingStats;
+}TypingStats;
 
-void init_game(void);
-void cleanup_game(void);
-void init_terminal(void);
-void setup_colors(void);
-void handle_resize(int sig);
-void draw_wrapped_text(const char *text, int start_row, int console_width);
+void init_typefast();
+void cleanup_typefast();
+void setup_display_colors();
 
-int show_menu_and_get_choice(void);
-TypingStats run_typing_test(int test_type, int *global_mistakes);
-void display_quote(const char *text);
-void process_typing_input(const char *text, TypingStats *stats);
-int is_backspace(int ch);
+void get_text_sequence_from_text_type(int text_type);
+void start_typing_process(int text_type);
+
+int  is_backspace(int ch);
 void handle_backspace(int *col_iter, int *row_index, const char *text);
 void display_correct_char(char ch, int row, int col);
 void display_wrong_char(char ch, int row, int col);
 
 void display_statistics(const TypingStats *stats, int text_len);
 void display_hardest_keys(const int *mistakes);
-int find_max_mistake(int *mistakes, int *max_value);
-int wait_for_continue(void);
+int  find_max_mistake(int *mistakes, int *max_value);
+int  wait_for_user_option();
 
-void handle_resize(int sig) {
-  getmaxyx(stdscr, console_height, console_width);
-  resizeterm(console_height, console_width);
-  refresh();
-}
 int main(void) {
-  init_game();
-
-  int global_mistakes[MAX_KEYTYPES] = {0};
-  int is_active = 1;
-
-  while (is_active) {
-    getmaxyx(stdscr, console_height, console_width);
-
-    int menu_choice = show_menu_and_get_choice();
-
-    switch (menu_choice) {
-    case '1': {
-      TypingStats stats = run_typing_test(1, global_mistakes);
-
-      is_active = wait_for_continue();
-
-      free(stats.mistakes);
-      break;
-    }
-    case '2': {
-      TypingStats stats = run_typing_test(2, global_mistakes);
-
-      is_active = wait_for_continue();
-
-      free(stats.mistakes);
-      break;
-    }
-    case ESCAPE_CODE:
-      is_active = 0;
-      break;
-    default:
-      break;
-    }
+  init_typefast();
+  int typefast_is_active = 1;
+  while(typefast_is_active){
+    show_menu();
+    // get user's text type option
+    int text_type = get_text_type();
+    clear(); refresh();
+    get_text_sequence_from_text_type(text_type);
+    // all logic for the typing process
+    start_typing_process(text_type);
+    // after the typing session give options
+    typefast_is_active = wait_for_user_option();
   }
-
-  // Cleanup
-  cleanup_game();
   return 0;
 }
-void init_game(void) {
-  init_quote_array();
-  load_quotes();
-  init_joke_array();
 
+void init_typefast() {
+  srand(time(NULL));
+
+  // get terminal size
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   console_width = w.ws_col;
   console_height = w.ws_row;
 
-  init_terminal();
-  setup_colors();
-
-  srand(time(NULL));
-}
-
-void init_terminal(void) {
+  // initialize ncurses lib utilities
   initscr();
   cbreak();
   noecho();
   use_default_colors();
-  signal(SIGWINCH, handle_resize);
+  setup_display_colors();
 }
 
-void setup_colors(void) {
+void setup_display_colors() {
   start_color();
   init_pair(1, COLOR_GREEN, -1);        // Correct character
   init_pair(2, COLOR_BLACK, COLOR_RED); // Wrong character
@@ -106,136 +67,66 @@ void setup_colors(void) {
   init_pair(4, COLOR_BLUE, -1);         // Statistics
 }
 
-void draw_wrapped_text(const char *text, int start_row, int console_width) {
-  int i = 0;
-  while (text[i] != '\0') {
-    int row = i / console_width + start_row;
-    int col = i % console_width;
-    mvaddch(row, col, text[i]);
-    i++;
-  }
-}
+void start_typing_process(int text_type){
+  int c, character_counter = 0;
+  int col, row;
+  // the typing begins here
+  printw("Typefast:\n");
 
-int show_menu_and_get_choice(void) {
-  clear();
-  show_menu();
-  refresh();
-
-  int choice;
-  while ((choice = getch())) {
-    switch (choice) {
-    case '1':
-    case '2':
-      return choice;
-    case ESCAPE_CODE:
-      return ESCAPE_CODE;
-    default:
-      break;
-    }
-  }
-  return 0;
-}
-
-TypingStats run_typing_test(int test_type, int *global_mistakes) {
-  TypingStats stats = {0};
-  stats.mistakes = calloc(MAX_KEYTYPES, sizeof(int));
-
-  const char *text_to_type = NULL;
-  int text_len = 0;
-  int joke_index = 0;
-  if (test_type == 1) {
-    if (QUOTE_COUNTER > 0) {
-      int quote_index = rand() % QUOTE_COUNTER;
-      text_to_type = QUOTE_ARRAY[quote_index];
-    }
-  } else if (test_type == 2) {
-    if (jokeCount > 0 && JOKE_ARRAY != NULL) {
-      joke_index = (rand() % (jokeCount / 2)) * 2;
-      text_to_type = JOKE_ARRAY[joke_index];
-    }
-  }
-
-  if (!text_to_type || strlen(text_to_type) == 0) {
-    text_to_type = "No text available for typing test.";
-  }
-
-  text_len = strlen(text_to_type);
-
-  display_quote(text_to_type);
-
-  struct timeval start, end;
-  gettimeofday(&start, NULL);
-
-  process_typing_input(text_to_type, &stats);
-
-  gettimeofday(&end, NULL);
-  stats.elapsed_time =
-      (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-
-  for (int i = 0; i < MAX_KEYTYPES; i++) {
-    global_mistakes[i] += stats.mistakes[i];
-  }
-  printw("\n%s\n", JOKE_ARRAY[joke_index + 1]);
-  display_statistics(&stats, text_len);
-  display_hardest_keys(global_mistakes);
-
-  return stats;
-}
-
-void display_quote(const char *text) {
-  clear();
-  printw("Type fast:\n");
-  draw_wrapped_text(text, 1, console_width);
-  move(1, 0);
-}
-
-void process_typing_input(const char *text, TypingStats *stats) {
-  int text_len = strlen(text);
-  int col_iter = 0, row_index = 1;
-  int choice;
-
-  while ((choice = getch()) != ESCAPE_CODE && col_iter < text_len) {
-    stats->total_chars++;
-
-    if (is_backspace(choice)) {
-      handle_backspace(&col_iter, &row_index, text);
-      continue;
-    }
-
-    row_index = col_iter / console_width + 1;
-
-    if (text[col_iter] == choice) {
-      stats->valid_chars++;
-      display_correct_char(choice, row_index, col_iter % console_width);
-    } else {
-      if (choice >= ' ' && choice < ' ' + MAX_KEYTYPES) {
-        stats->mistakes[choice - ' ']++;
+  switch(text_type){
+    case QUOTES_TEXT_TYPE:
+      // display the quote to user
+      printw("%s", CURRENT_QUOTE);
+      // move cursor to start of typing sequence
+      move(1,0);
+      // get current char from user
+      while((c = getch())){
+        if(!console_width){
+          printw("The console width is zero.");
+          return;
+        }
+        col = character_counter % console_width;
+        row = character_counter / console_width + 1;
+        // in case of backspace
+        if(is_backspace(c)){
+          handle_backspace(&character_counter, &row, CURRENT_QUOTE);
+          continue;
+        }
+        if(c == CURRENT_QUOTE[character_counter]){
+          display_correct_char(c, row, col);
+        }else{
+          display_wrong_char(CURRENT_QUOTE[character_counter], row, col);
+        }
+        if(character_counter == CURRENT_QUOTE_LENGTH - 1) return;
+        character_counter++;
       }
-      display_wrong_char(text[col_iter], row_index, col_iter % console_width);
+      break;
+    case JOKES_TEXT_TYPE:
+    // just copy paste for any other types u know the drill
+      ;
+      break;
+    default:
+      printf("Not a valid text type.");
+      return;
     }
-
-    col_iter++;
-  }
+  return;
 }
 
 int is_backspace(int ch) {
   return (ch == 127 || ch == 8 || ch == KEY_BACKSPACE);
 }
 
-void handle_backspace(int *col_iter, int *row_index, const char *text) {
-  if (*col_iter > 0) {
-    (*col_iter)--;
-
-    if ((*col_iter + 1) % console_width == 0) {
-      (*row_index)--;
-    }
-
-    *row_index = *col_iter / console_width + 1;
-
-    attron(COLOR_PAIR(3));
-    mvprintw(*row_index, *col_iter % console_width, "%c", text[*col_iter]);
-    move(*row_index, *col_iter % console_width);
+void handle_backspace(int *col, int *row, const char *current_text_sequence) {
+  if (*col > 0) {
+    (*col)--;
   }
+  if ((*col + 1) % console_width == 0) {
+    (*row)--;
+  }
+  *row = *col / console_width + 1;
+  attron(COLOR_PAIR(3));
+  mvprintw(*row, *col % console_width, "%c", current_text_sequence[*col]);
+  move(*row, *col % console_width);
 }
 
 void display_correct_char(char ch, int row, int col) {
@@ -297,24 +188,61 @@ int find_max_mistake(int *mistakes, int *max_value) {
   return max_pos;
 }
 
-int wait_for_continue(void) {
+int wait_for_user_option() {
   attron(COLOR_PAIR(3));
   printw("\nPress \"F\" to try again.\n");
   printw("Press \"ESC\" to exit the program.\n");
 
-  int choice;
-  while ((choice = getch())) {
-    if (choice == 'F' || choice == 'f') {
+  int c;
+  while ((c = getch())) {
+    if (c == 'F') {
       return 1;
-    } else if (choice == ESCAPE_CODE) {
+    } else if (c == ESCAPE_CODE) {
       return 0;
     }
   }
   return 0;
 }
 
-void cleanup_game(void) {
-  deallocate_quote_array();
-  deallocate_joke_array();
-  endwin();
+// void cleanup_typefast() {
+//   endwin();
+// }
+
+void get_text_sequence_from_text_type(int text_type){
+  switch(text_type){
+    case QUOTES_TEXT_TYPE:
+    QUOTES_FILE = fopen("quotes.txt", "r");
+      if(!QUOTES_FILE){
+        printf("No such file quotes.txt.");
+        fclose(QUOTES_FILE);
+        return;
+      }
+      TOTAL_QUOTES = get_num_of_lines(QUOTES_FILE); 
+      // check if number is correct
+      if(TOTAL_QUOTES < 1) {
+        printf("Invalid number of quotes in \"quotes.txt\" file.");
+        fclose(QUOTES_FILE);
+        return;
+      }
+      int pick_random_line = rand() % TOTAL_QUOTES;
+      // buffer to store the line from quotes file
+      char * buffer = malloc(MAX_LINE_SIZE * sizeof(char));
+      // obtain the random text line from the quotes file and place it in buffer
+      while(fgets(buffer, MAX_LINE_SIZE, QUOTES_FILE) && pick_random_line--);
+      // terminate the buffer
+      int buffer_size = strcspn(buffer, "\n");
+      buffer[buffer_size] = '\0';
+      // save the quote
+      CURRENT_QUOTE = buffer;
+      CURRENT_QUOTE_LENGTH = buffer_size;
+      fclose(QUOTES_FILE);
+      break;
+    case JOKES_TEXT_TYPE:
+      ;
+      break;
+    default:
+      printf("Not a valid text type.");
+      return;
+    }
+  return;
 }

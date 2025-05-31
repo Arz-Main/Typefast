@@ -1,200 +1,163 @@
 #include "common.h"
 
-char **QUOTE_ARRAY = NULL;
-char **JOKE_ARRAY = NULL;
-int QUOTE_COUNTER = 0;
-int jokeCount = 0;
-int console_width, console_height;
-FILE *jokes = NULL;
+int console_width=0, console_height=0;
+FILE * QUOTES_FILE = NULL;
+int TOTAL_QUOTES = 0;
+char const * CURRENT_QUOTE = NULL;
+int CURRENT_QUOTE_LENGTH = 0;
 
-void init_quote_array() {
-  if (QUOTE_ARRAY)
-    return;
-  QUOTE_ARRAY = malloc(MAX_QUOTE_ARRAY_SIZE * sizeof(char *));
-}
+FILE * JOKES_FILE = NULL;
+int TOTAL_JOKES = 0;
+char const * CURRENT_JOKE = NULL;
 
-void add_quote(char *text) {
-  if (QUOTE_COUNTER > MAX_QUOTE_ARRAY_SIZE - 1) {
-    printf("Increase the max quotes limit.");
-    return;
-  }
-  QUOTE_ARRAY[QUOTE_COUNTER++] = strdup(text);
-}
-
-void deallocate_quote_array() {
-  if (!QUOTE_ARRAY) {
-    return;
-  }
-  for (int i = 0; i < QUOTE_COUNTER; i++) {
-    free(QUOTE_ARRAY[i]);
-  }
-  free(QUOTE_ARRAY);
-  QUOTE_ARRAY = NULL;
-  QUOTE_COUNTER = 0;
-}
-
-void load_quotes() {
-  add_quote(
-      "Software is like sex: it's better when it's free. - Linus Torvalds");
-  add_quote("If we want users to like our software, we should design it to "
-            "behave like a likable person. - Alan Cooper");
-  add_quote("Quality is a product of a conflict between programmers and "
-            "testers. - Yegor Bugayenk");
-  add_quote("Everybody should learn to program a computer because it teaches "
-            "you how to think. - Steve Jobs");
-  add_quote("I taught myself how to program computers when I was a kid, bought "
-            "my first computer when I was 10, and sold my first commercial "
-            "program when I was 12. - Elon Musk");
-  add_quote("Software and cathedrals are much the same - first we build them, "
-            "then we pray.");
-  add_quote("Web development is difficult, only then it is fun to do. You just "
-            "have to set your standards. If it were to be easy, would anyone "
-            "do it? - Olawale Daniel");
-  add_quote("Programmers seem to be changing the world. It would be a relief, "
-            "for them and for all of us, if they knew something about it. - "
-            "Ellen Ullman");
-  add_quote("Most good programmers do programming not because they expect to "
-            "get paid or get adulation by the public, but because it is fun to "
-            "program. - Linus Torvalds");
-  add_quote("When I wrote this code, only God and I understood what I did. Now "
-            "only God knows. - Anonymous");
-  add_quote("I'm not a great programmer; I'm just a good programmer with great "
-            "habits. - Kent Beck");
-  add_quote("You might not think that programmers are artists, but programming "
-            "is an extremely creative profession. It's logic-based creativity. "
-            "- John Romero");
-  add_quote("Programming is learned by writing programs. - Brian Kernighan");
-  add_quote(
-      "Software comes from heaven when you have good hardware. - Ken Olsen");
-  add_quote("There is always one more bug to fix. - Ellen Ullman");
-  add_quote("If debugging is the process of removing bugs, then programming "
-            "must be the process of putting them in. - Sam Redwine");
-  add_quote("Talk is cheap. Show me the code. - Linus Torvalds");
-  add_quote("Sometimes it pays to stay in bed on Monday, rather than spending "
-            "the rest of the week debugging Monday's code. - Dan Salomon");
-  add_quote("If, at first, you do not succeed, call it version 1.0. - Khayri "
-            "R.R. Woulfe");
-  add_quote("Computers are fast; developers keep them slow. - Anonymous");
-}
-
-void init_joke_array() {
-  jokes = fopen("jokes.txt", "r");
-  if (jokes == NULL) {
-    printf("jokes.txt not found! Skipping jokes...\n");
-    jokeCount = 0;
-    JOKE_ARRAY = NULL;
-    return;
-  }
-
-  if (!(fscanf(jokes, "%d", &jokeCount) == 1)) {
-    printf("Joke count not found! Skipping jokes...\n");
-    fclose(jokes);
-    jokeCount = 0;
-    JOKE_ARRAY = NULL;
-    return;
-  }
-
-  if (jokeCount <= 0) {
-    printf("No jokes to load.\n");
-    fclose(jokes);
-    jokeCount = 0;
-    JOKE_ARRAY = NULL;
-    return;
-  }
-
-  JOKE_ARRAY = malloc(jokeCount * 2 * sizeof(char *)); // for joke and punchline
-  if (JOKE_ARRAY == NULL) {
-    printf("Error at jokes list memory allocation\n");
-    fclose(jokes);
-    jokeCount = 0;
-    return;
-  }
-
-  for (int i = 0; i < jokeCount * 2; i++) {
-    JOKE_ARRAY[i] = NULL;
-  }
-
-  char line[1000];
-  int index = 0;
-
-  fgets(line, sizeof(line), jokes);
-
-  for (int i = 0; i < jokeCount && index < jokeCount * 2; i++) {
-    if (fgets(line, sizeof(line), jokes) != NULL) {
-      line[strcspn(line, "\n")] = '\0';
-
-      char *setup = malloc(500);
-      char *punchline = malloc(500);
-
-      if (setup == NULL || punchline == NULL) {
-        printf("Error: Failed to allocate memory for joke %d\n", i);
-        free(setup);
-        free(punchline);
-        break;
-      }
-
-      setup[0] = '\0';
-      punchline[0] = '\0';
-
-      char *equal_pos = strchr(line, '=');
-      char *plus_pos = strchr(line, '+');
-
-      if (equal_pos != NULL && plus_pos != NULL) {
-        *plus_pos = '\0';
-        strcpy(setup, equal_pos + 1);
-        strcpy(punchline, plus_pos + 1);
-      } else if (equal_pos != NULL) {
-        strcpy(setup, equal_pos + 1);
-        strcpy(punchline, "");
-      } else {
-        strcpy(setup, line);
-        strcpy(punchline, "");
-      }
-
-      JOKE_ARRAY[index] = setup;
-      JOKE_ARRAY[index + 1] = punchline;
-      index += 2;
+int get_text_type(){
+  int option;
+  while ((option = getch())){
+    switch (option){
+      case '1': return QUOTES_TEXT_TYPE; break;
+      // case '2': return JOKES_TEXT_TYPE; break;
     }
   }
-
-  fclose(jokes);
+  return 0;
 }
 
-void deallocate_joke_array() {
-  if (JOKE_ARRAY == NULL) {
-    return;
-  }
-
-  for (int i = 0; i < jokeCount * 2; i++) {
-    if (JOKE_ARRAY[i] != NULL) {
-      free(JOKE_ARRAY[i]);
-      JOKE_ARRAY[i] = NULL;
+int get_num_of_lines(FILE * text_file){
+    if(!text_file){
+        printf("The text file can't be opened.");
+        return -1;
+    } 
+    int number_of_lines = 0;
+    // buffer to store all lines
+    char * buffer = malloc(MAX_LINE_SIZE * sizeof(char));
+    // get the number of text entries (placed in the text file)
+    fgets(buffer, MAX_LINE_SIZE, text_file);
+    // check to see if it read the number correctly
+    if(sscanf(buffer, "%d", &number_of_lines) != 1){
+      return -1;
     }
-  }
-  free(JOKE_ARRAY);
-  JOKE_ARRAY = NULL;
-  jokeCount = 0;
+    return number_of_lines;
 }
 
 void show_menu() {
+  clear();
+  refresh();
   attron(COLOR_PAIR(4));
-  printw(" ______        _     _______                      \n");
-  printw("|  ____|      | |   |__   __|                     \n");
-  printw("| |__ __ _ ___| |_     | |_   _ _ __   ___ _ __   \n");
-  printw("|  __/ _` / __| __|    | | | | | '_ \\ / _ \\ '__|\n");
-  printw("| | | (_| \\__ \\ |_     | | |_| | |_) |  __/ |   \n");
-  printw("|_|  \\__,_|___/\\__|    |_|\\__, | .__/ \\___|_| \n");
-  printw("                           __/ | |                \n");
-  printw("                          |___/|_|              \n\n");
+  printw("_____                     _______________________________\n");
+  printw("__  /_____  _________________  ____/__    |_  ___/__  __/\n");
+  printw("_  __/_  / / /__  __ \\  _ \\_  /_   __  /| |____ \\__  /   \n");
+  printw("/ /_ _  /_/ /__  /_/ /  __/  __/   _  ___ |___/ /_  /    \n");
+  printw("\\__/ _\\__, / _  .___/\\___//_/      /_/  |_/____/ /_/     \n");
+  printw("     /____/  /_/                                         \n\n");
+
   attroff(COLOR_PAIR(4));
   attron(COLOR_PAIR(4) | A_BLINK);
-  printw(" +===========================================+\n");
-  printw(" |    Made by Lisnic Dan & Pisarenco Denis   |\n");
-  printw(" +===========================================+\n\n");
+  printw("+======================================+\n");
+  printw("| Made by Lisnic Dan & Pisarenco Denis |\n");
+  printw("+======================================+\n\n");
   attrset(A_NORMAL);
-
-  printw("     Select what you want to type: \n");
-  printw("1: Quotes\n");
-  printw("2: Jokes\n");
-  printw("ESC: Exit\n");
+  printw("Select what you want to type: \n");
+  printw("  1: Quotes\n");
+  // printw("  2: Jokes\n");
+  printw("  ESC: Exit\n");
 }
+
+
+
+
+
+// A HUGE WASTE OF TIME
+// void free_text_array(char *** text_array_ptr, int text_array_size){
+//   if(!text_array_ptr || !(*text_array_ptr)){
+//     printf("Nothing to be freed.");
+//     return;
+//   }
+//   char ** text_array = *text_array_ptr;
+//   for(int i=0; i< text_array_size; i++){
+//     if(text_array[i]){
+//       free(text_array[i]);
+//     }
+//   }
+//   free(text_array);
+//   *text_array_ptr = NULL;
+// }
+
+// // all this should do is: ONLY make space in the selected array of text, NOT place actual text in the array
+// int init_text_array(int text_type) {
+//   switch (text_type){
+//     case QUOTES_TEXT_TYPE:
+//       QUOTES_FILE = fopen("quotes.txt", "r");
+//       if(!QUOTES_FILE){
+//         printf("No such file quotes.txt.");
+//         fclose(QUOTES_FILE);
+//         return 1;
+//       }
+//       QUOTES_COUNTER = get_num_of_lines(QUOTES_FILE); 
+//       // check if number is correct
+//       if(QUOTES_COUNTER < 1) {
+//         printf("Invalid number of quotes in \"quotes.txt\" file.");
+//         fclose(QUOTES_FILE);
+//         return 1;
+//       }
+//       // allocate space for the quotes in the QUOTES_ARRAY
+//       QUOTES_ARRAY = calloc(QUOTES_COUNTER, sizeof(char*));
+//       if(!QUOTES_ARRAY) {
+//         printf("Allocation for quotes array failed.");
+//         fclose(QUOTES_FILE);
+//         return 1;
+//       }
+//       for(int i=0; i < QUOTES_COUNTER; i++){
+//         QUOTES_ARRAY[i] = calloc(MAX_LINE_SIZE, sizeof(char));
+//         if(!QUOTES_ARRAY[i]) {
+//           printf("Allocation for quotes array failed.");
+//           free_text_array(&QUOTES_ARRAY, QUOTES_COUNTER);
+//           fclose(QUOTES_FILE);
+//           return 1;
+//         }
+//       }
+//       fclose(QUOTES_FILE);
+//       break;
+//     case JOKES_TEXT_TYPE:
+//       JOKES_FILE = fopen("jokes.txt", "r");
+//       if(!JOKES_FILE){
+//         fclose(JOKES_FILE);
+//         printf("No such file jokes.txt.");
+//         return 1;
+//       }
+//       JOKES_COUNTER = get_num_of_lines(JOKES_FILE); 
+//       // check if number is correct
+//       if(JOKES_COUNTER < 1) {
+//         printf("Invalid number of jokes \"jokes.txt\" file");
+//         fclose(JOKES_FILE);
+//         return 1;
+//       }
+//       // allocate space for the jokes in the JOKES_ARRAY
+//       JOKES_ARRAY = calloc(JOKES_COUNTER, sizeof(char*));
+//       if(!QUOTES_ARRAY) {
+//         printf("Allocation for quotes array failed.");
+//         fclose(JOKES_FILE);
+//         return 1;
+//       }
+//       for(int i=0; i < JOKES_COUNTER; i++){
+//         JOKES_ARRAY[i] = calloc(MAX_LINE_SIZE, sizeof(char));
+//         if(!JOKES_ARRAY[i]) {
+//           printf("Allocation for jokes array failed.");
+//           free_text_array(&JOKES_ARRAY, JOKES_COUNTER);
+//           fclose(JOKES_FILE);
+//           return 1;
+//         }
+//       }
+//       fclose(JOKES_FILE);
+//       break;
+//     // add more cases here if needed
+
+//     default:
+//       printf("Not a valid type of text file.");
+//       return 1;
+//       break;
+//   }
+//   return 0;
+// }
+
+
+
+
