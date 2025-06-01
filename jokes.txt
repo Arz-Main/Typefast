@@ -1,21 +1,18 @@
-20
-=Why do programmers prefer dark mode? +Because light attracts bugs!
-=How many programmers does it take to change a light bulb? +None. It's a hardware problem.
-=I told my computer I needed a break, and now it won't stop sending me Kit-Kats.
-=Why do Java developers wear glasses? +Because they don't C#.
-=Debugging: Being the detective in a crime movie where you are also the murderer.
-=There are 10 types of people in the world: those who understand binary and those who don't.
-=Why did the programmer quit his job? +Because he didn't get arrays (a raise).
-=I would tell you a joke about recursion, but you probably won't get it... until I tell it again.
-=To understand what recursion is, you must first understand recursion.
-=A SQL query walks into a bar, walks up to two tables and asks: "Can I join you?"
-=Why do programmers hate nature? +It has too many bugs.
-=Why did the developer go broke? +Because he used up all his cache.
-=What’s a programmer's favorite place to hang out? +The Foo Bar.
-=Why do Python programmers have low self-esteem? +Because they're constantly comparing themselves to others.
-=What do you call a programmer from Finland? +Nerdic.
-=Why did the computer show up at work late? +It had a hard drive.
-=How do programmers cheer up? +They console themselves.
-=What do you get when you cross a computer and a lifeguard? +A screensaver.
-=Why was the JavaScript developer sad? +Because he didn't Node how to Express himself.
-=Real programmers count from 0.
+17
+Why do programmers prefer dark mode?+Because light attracts bugs!
+How many programmers does it take to change a light bulb?+None. It's a hardware problem.
+I told my computer I needed a break+Now it won't stop sending me Kit-Kats.
+Why do Java developers wear glasses?+Because they don't C#.
+Why did the programmer quit his job?+Because he didn't get arrays (a raise).
+I would tell you a joke about recursion, but you probably won't get it+Until I tell it again.
+To understand what recursion is, you must first+Understand recursion.
+A SQL query walks into a bar, walks up to two tables and asks+"Can I join you?"
+Why do programmers hate nature?+It has too many bugs.
+Why did the developer go broke?+Because he used up all his cache.
+What's a programmer's favorite place to hang out?+The Foo Bar.
+Why do Python programmers have low self-esteem?+Because they're constantly comparing themselves to others.
+What do you call a programmer from Finland?+Nerdic.
+Why did the computer show up at work late?+It had a hard drive.
+How do programmers cheer up?+They console themselves.
+What do you get when you cross a computer and a lifeguard?+A screensaver.
+Why was the JavaScript developer sad?+Because he didn't Node how to Express himself.

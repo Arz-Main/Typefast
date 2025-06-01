@@ -1,21 +1,17 @@
 #include "common.h"
 
-int console_width=0, console_height=0;
-FILE * QUOTES_FILE = NULL;
-int TOTAL_QUOTES = 0;
-char const * CURRENT_QUOTE = NULL;
-int CURRENT_QUOTE_LENGTH = 0;
-
-FILE * JOKES_FILE = NULL;
-int TOTAL_JOKES = 0;
-char const * CURRENT_JOKE = NULL;
+int console_width = 0, console_height = 0;
+FILE * SEQUENCE_FILE;
+int TOTAL_SEQUENCES_IN_FILE = 0;
+char const * CURRENT_SEQUENCE = NULL;
+int CURRENT_SEQUENCE_LENGTH = 0;
 
 int get_text_type(){
   int option;
   while ((option = getch())){
     switch (option){
       case '1': return QUOTES_TEXT_TYPE; break;
-      // case '2': return JOKES_TEXT_TYPE; break;
+      case '2': return JOKES_TEXT_TYPE; break;
     }
   }
   return 0;
@@ -23,18 +19,24 @@ int get_text_type(){
 
 int get_num_of_lines(FILE * text_file){
     if(!text_file){
-        printf("The text file can't be opened.");
+        printf("The text file isn't available.");
         return -1;
     } 
     int number_of_lines = 0;
-    // buffer to store all lines
+    // buffer to store the first line from file
     char * buffer = malloc(MAX_LINE_SIZE * sizeof(char));
-    // get the number of text entries (placed in the text file)
+    if(!buffer){
+      printf("Failed to allocate memory in get_num_of_lines function.");
+      return -1;
+    }
+    // get the number of text entries (placed in the first line of text file)
     fgets(buffer, MAX_LINE_SIZE, text_file);
     // check to see if it read the number correctly
     if(sscanf(buffer, "%d", &number_of_lines) != 1){
+      free(buffer);
       return -1;
     }
+    free(buffer);
     return number_of_lines;
 }
 
@@ -57,107 +59,37 @@ void show_menu() {
   attrset(A_NORMAL);
   printw("Select what you want to type: \n");
   printw("  1: Quotes\n");
-  // printw("  2: Jokes\n");
+  printw("  2: Jokes\n");
   printw("  ESC: Exit\n");
 }
 
+void init_typefast() {
+  srand(time(NULL));
 
+  // get terminal size
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  console_width = w.ws_col;
+  console_height = w.ws_row;
 
+  // initialize ncurses lib utilities
+  initscr();
+  cbreak();
+  noecho();
+  use_default_colors();
+  setup_display_colors();
+}
 
+void setup_display_colors() {
 
-// A HUGE WASTE OF TIME
-// void free_text_array(char *** text_array_ptr, int text_array_size){
-//   if(!text_array_ptr || !(*text_array_ptr)){
-//     printf("Nothing to be freed.");
-//     return;
-//   }
-//   char ** text_array = *text_array_ptr;
-//   for(int i=0; i< text_array_size; i++){
-//     if(text_array[i]){
-//       free(text_array[i]);
-//     }
-//   }
-//   free(text_array);
-//   *text_array_ptr = NULL;
-// }
+  start_color();
+  init_pair(1, COLOR_GREEN, -1);        // Correct character
+  init_pair(2, COLOR_BLACK, COLOR_RED); // Wrong character
+  init_pair(3, COLOR_WHITE, -1);        // Default text
+  init_pair(4, COLOR_BLUE, -1);         // Statistics
+}
 
-// // all this should do is: ONLY make space in the selected array of text, NOT place actual text in the array
-// int init_text_array(int text_type) {
-//   switch (text_type){
-//     case QUOTES_TEXT_TYPE:
-//       QUOTES_FILE = fopen("quotes.txt", "r");
-//       if(!QUOTES_FILE){
-//         printf("No such file quotes.txt.");
-//         fclose(QUOTES_FILE);
-//         return 1;
-//       }
-//       QUOTES_COUNTER = get_num_of_lines(QUOTES_FILE); 
-//       // check if number is correct
-//       if(QUOTES_COUNTER < 1) {
-//         printf("Invalid number of quotes in \"quotes.txt\" file.");
-//         fclose(QUOTES_FILE);
-//         return 1;
-//       }
-//       // allocate space for the quotes in the QUOTES_ARRAY
-//       QUOTES_ARRAY = calloc(QUOTES_COUNTER, sizeof(char*));
-//       if(!QUOTES_ARRAY) {
-//         printf("Allocation for quotes array failed.");
-//         fclose(QUOTES_FILE);
-//         return 1;
-//       }
-//       for(int i=0; i < QUOTES_COUNTER; i++){
-//         QUOTES_ARRAY[i] = calloc(MAX_LINE_SIZE, sizeof(char));
-//         if(!QUOTES_ARRAY[i]) {
-//           printf("Allocation for quotes array failed.");
-//           free_text_array(&QUOTES_ARRAY, QUOTES_COUNTER);
-//           fclose(QUOTES_FILE);
-//           return 1;
-//         }
-//       }
-//       fclose(QUOTES_FILE);
-//       break;
-//     case JOKES_TEXT_TYPE:
-//       JOKES_FILE = fopen("jokes.txt", "r");
-//       if(!JOKES_FILE){
-//         fclose(JOKES_FILE);
-//         printf("No such file jokes.txt.");
-//         return 1;
-//       }
-//       JOKES_COUNTER = get_num_of_lines(JOKES_FILE); 
-//       // check if number is correct
-//       if(JOKES_COUNTER < 1) {
-//         printf("Invalid number of jokes \"jokes.txt\" file");
-//         fclose(JOKES_FILE);
-//         return 1;
-//       }
-//       // allocate space for the jokes in the JOKES_ARRAY
-//       JOKES_ARRAY = calloc(JOKES_COUNTER, sizeof(char*));
-//       if(!QUOTES_ARRAY) {
-//         printf("Allocation for quotes array failed.");
-//         fclose(JOKES_FILE);
-//         return 1;
-//       }
-//       for(int i=0; i < JOKES_COUNTER; i++){
-//         JOKES_ARRAY[i] = calloc(MAX_LINE_SIZE, sizeof(char));
-//         if(!JOKES_ARRAY[i]) {
-//           printf("Allocation for jokes array failed.");
-//           free_text_array(&JOKES_ARRAY, JOKES_COUNTER);
-//           fclose(JOKES_FILE);
-//           return 1;
-//         }
-//       }
-//       fclose(JOKES_FILE);
-//       break;
-//     // add more cases here if needed
-
-//     default:
-//       printf("Not a valid type of text file.");
-//       return 1;
-//       break;
-//   }
-//   return 0;
-// }
-
-
-
-
+void cleanup_typefast() {
+  free((void*)CURRENT_SEQUENCE);
+  endwin();
+}

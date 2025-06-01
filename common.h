@@ -14,23 +14,22 @@
 #define MAX_ARRAY_SIZE 100
 #define MAX_LINE_SIZE 1000
 #define MAX_KEYTYPES 256
+#define DELIMITER '+'
 
 // add text types here and continue as follows:
 #define QUOTES_TEXT_TYPE 1
 #define JOKES_TEXT_TYPE 2
 
-extern FILE * JOKES_FILE;
-extern FILE * QUOTES_FILE;
 extern int console_width, console_height;
 
-extern int TOTAL_QUOTES;
-extern char const * CURRENT_QUOTE;
-extern int CURRENT_QUOTE_LENGTH;
+extern FILE * SEQUENCE_FILE;
+extern int TOTAL_SEQUENCES_IN_FILE;
+extern char const * CURRENT_SEQUENCE;
+extern int CURRENT_SEQUENCE_LENGTH;
 
-extern int TOTAL_JOKES;
-extern char const * CURRENT_JOKE;
-extern int CURRENT_JOKE_LENGTH;
-
+void init_typefast();
+void setup_display_colors();
+void cleanup_typefast();
 void show_menu();
 
 // helper functions for going through the text files
