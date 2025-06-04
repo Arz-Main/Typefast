@@ -105,7 +105,7 @@ void display_hardest_keys(const int * mistakes) {
       break;
 
     copy_mistakes[max_pos] = 0;
-    printw("   Key: \"%c\", it was typed wrong: %d time(s).\n", max_pos + ' ', max_value);
+    printw("   Key: \"%c\", it was typed wrong: %d time(s).\n", max_pos + ASCII_OFFSET, max_value);
   }
 }
 
@@ -211,7 +211,7 @@ char typing_process(int * character_counter_adr, int * col_adr, int * row_adr, i
       statistics.valid_chars++;
       display_correct_char(c, *row_adr, *col_adr);
     }else{
-      statistics.invalid_char_array[c - ' ']++;
+      statistics.invalid_char_array[CURRENT_SEQUENCE[*character_counter_adr] - ASCII_OFFSET]++;
       display_wrong_char(CURRENT_SEQUENCE[*character_counter_adr], *row_adr, *col_adr);
     }
     if(*character_counter_adr == CURRENT_SEQUENCE_LENGTH - 1) return 0;

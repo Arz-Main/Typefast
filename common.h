@@ -15,6 +15,8 @@
 #define MAX_LINE_SIZE 1000
 #define MAX_KEYTYPES 256
 #define DELIMITER '+'
+#define ASCII_OFFSET '!'
+
 
 // add text types here and continue as follows:
 #define QUOTES_TEXT_TYPE 1
