@@ -43,7 +43,7 @@ int get_num_of_lines(FILE * text_file){
 void show_menu() {
   clear();
   refresh();
-  attron(COLOR_PAIR(4));
+  attron(COLOR_PAIR(5));
   printw("_____                     _______________________________\n");
   printw("__  /_____  _________________  ____/__    |_  ___/__  __/\n");
   printw("_  __/_  / / /__  __ \\  _ \\_  /_   __  /| |____ \\__  /   \n");
@@ -87,6 +87,7 @@ void setup_display_colors() {
   init_pair(2, COLOR_BLACK, COLOR_RED); // Wrong character
   init_pair(3, COLOR_WHITE, -1);        // Default text
   init_pair(4, COLOR_BLUE, -1);         // Statistics
+  init_pair(5, COLOR_RED, -1);         // Logo
 }
 
 void cleanup_typefast() {
