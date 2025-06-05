@@ -1,4 +1,4 @@
-17
+23
 Why do programmers prefer dark mode?+Because light attracts bugs!
 How many programmers does it take to change a light bulb?+None. It's a hardware problem.
 I told my computer I needed a break+Now it won't stop sending me Kit-Kats.
@@ -16,3 +16,9 @@ Why did the computer show up at work late?+It had a hard drive.
 How do programmers cheer up?+They console themselves.
 What do you get when you cross a computer and a lifeguard?+A screensaver.
 Why was the JavaScript developer sad?+Because he didn't Node how to Express himself.
+A programmer's wife tells him: "Go to the store and buy a loaf of bread. If they have eggs, buy a dozen."+He returns with 12 loaves of bread.
+What's a programmer's favorite type of music?+Algo-rhythm.
+Why did the C developer go broke?+Because they kept using malloc without free.
+What do you call a group of 8 Hobbits?+A hobbyte.
+Front-end developer: "Can you make it pop?"+Back-end developer: "I can make it crash."
+I had a problem, so I decided to use regular expressions.+Now I have two problems.

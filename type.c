@@ -129,22 +129,26 @@ void get_text_sequence_from_text_type(int text_type){
   int buffer_size;
   switch(text_type){
     case QUOTES_TEXT_TYPE:
-    SEQUENCE_FILE = fopen("quotes.txt", "r");
+    SEQUENCE_FILE = fopen("/home/arz/Documents/4_Git_Projects/TypefastRepo/quotes.txt", "r");
       if(!SEQUENCE_FILE){
         printf("No such file quotes.txt.");
-        fclose(SEQUENCE_FILE);
-        return;
+        exit(1);
       }
       TOTAL_SEQUENCES_IN_FILE = get_num_of_lines(SEQUENCE_FILE); 
       // check if number is correct
       if(TOTAL_SEQUENCES_IN_FILE < 1) {
         printf("Invalid number of quotes in \"quotes.txt\" file.");
         fclose(SEQUENCE_FILE);
-        return;
+        exit(1);
       }
       pick_random_line = rand() % TOTAL_SEQUENCES_IN_FILE;
       // buffer to store the line from quotes file
       buffer = malloc(MAX_LINE_SIZE * sizeof(char));
+      if (!buffer) {
+        printf("Memory allocation failed.\n");
+        fclose(SEQUENCE_FILE);
+        exit(1);
+      }
       // obtain the random text line from the quotes file and place it in buffer
       while(fgets(buffer, MAX_LINE_SIZE, SEQUENCE_FILE) && pick_random_line--);
       // terminate the buffer
@@ -156,18 +160,17 @@ void get_text_sequence_from_text_type(int text_type){
       fclose(SEQUENCE_FILE);
       break;
     case JOKES_TEXT_TYPE:
-      SEQUENCE_FILE = fopen("jokes.txt", "r");
+      SEQUENCE_FILE = fopen("/home/arz/Documents/4_Git_Projects/TypefastRepo/jokes.txt", "r");
       if(!SEQUENCE_FILE){
         printf("No such file jokes.txt.");
-        fclose(SEQUENCE_FILE);
-        return;
+        exit(1);
       }
       TOTAL_SEQUENCES_IN_FILE = get_num_of_lines(SEQUENCE_FILE); 
       // check if number is correct
       if(TOTAL_SEQUENCES_IN_FILE < 1) {
         printf("Invalid number of jokes in \"jokes.txt\" file.");
         fclose(SEQUENCE_FILE);
-        return;
+        exit(1);
       }
       pick_random_line = rand() % TOTAL_SEQUENCES_IN_FILE;
       // buffer to store the line from quotes file
@@ -184,7 +187,7 @@ void get_text_sequence_from_text_type(int text_type){
       break;
     default:
       printf("Not a valid text type.");
-      return;
+      exit(1);
     }
   return;
 }
